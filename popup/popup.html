@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>保存到 flomo</h1>
+      <span class="close-btn">×</span>
+    </div>
+
+    <div class="input-group">
+      <label>原文标题和链接</label>
+      <textarea id="titleAndLink" readonly maxlength="500"></textarea>
+    </div>
+    
+    <div class="input-group">
+      <label>
+        原文摘要
+        <span class="ai-btn">AI 总结</span>
+      </label>
+      <textarea id="summary" maxlength="1000" placeholder="请输入摘要内容..."></textarea>
+      <span class="char-count">0/1000</span>
+    </div>
+    
+    <div class="input-group">
+      <label>个人感想</label>
+      <textarea id="thoughts" maxlength="1000" placeholder="请输入您的感想..."></textarea>
+      <span class="char-count">0/1000</span>
+    </div>
+    
+    <button id="submit">提交到 Flomo</button>
+
+    <div class="shortcuts-info">
+      <p>快捷键说明：</p>
+      <ul>
+        <li>打开插件：Ctrl/Command + Shift + F</li>
+        <li>提交内容：Ctrl/Command + Enter</li>
+      </ul>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html> 
