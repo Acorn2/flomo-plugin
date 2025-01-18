@@ -2,10 +2,12 @@
 const FLOMO_API = 'https://flomoapp.com/iwh/MjE0MjQyNQ/60fdac850fa4a0fcbbddf6f445d01667/';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // 获取当前标签页信息并填充标题和链接
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  const titleAndLinkText = `${tab.title}\n${tab.url}`;
-  document.getElementById('titleAndLink').value = titleAndLinkText;
+  // 获取当前标签页信息并填充到对应输入框
+  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+    const currentTab = tabs[0];
+    document.getElementById('title').value = currentTab.title || '';
+    document.getElementById('link').value = currentTab.url || '';
+  });
 
   // 设置字数统计监听
   setupCharCount('summary');
@@ -13,16 +15,40 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 提交按钮事件
   document.getElementById('submit').addEventListener('click', async () => {
-    const titleAndLink = document.getElementById('titleAndLink').value;
+    // 获取所有输入内容
+    const title = document.getElementById('title').value;
+    const link = document.getElementById('link').value;
     const summary = document.getElementById('summary').value;
     const thoughts = document.getElementById('thoughts').value;
 
-    // 组装发送内容
-    const content = [
-      `【原文】：${titleAndLink}`,
-      `【摘要】：${summary}`,
-      `【感想】：${thoughts}`
-    ].join('\n\n');
+    // 组装发送内容，按照特定格式
+    const contentParts = [];
+    
+    // 添加标题
+    if (title) {
+      contentParts.push(title);
+    }
+
+    // 添加链接 - 使用小括号包裹
+    if (link) {
+      contentParts.push(`(${link})`);
+    }
+
+    // 添加原文摘要 - 如果有内容，添加标题和内容
+    if (summary) {
+      contentParts.push('\n原文摘要：\n\n' + summary);
+    }
+
+    // 添加个人感想 - 如果有内容，添加标题和内容
+    if (thoughts) {
+      contentParts.push('\n个人感想：\n\n' + thoughts);
+    }
+
+    // 添加标签 - 可选
+    contentParts.push('\n#Chrome阅读笔记');
+
+    // 将所有部分用换行符连接
+    const content = contentParts.join('\n');
 
     try {
       const response = await fetch(FLOMO_API, {
@@ -34,8 +60,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (response.ok) {
-        showMessage('发送成功！', 'success');
-        // 清空摘要和感想
+        showMessage('保存成功！', 'success');
+        // 清空输入框，但保留标题和链接
         document.getElementById('summary').value = '';
         document.getElementById('thoughts').value = '';
         updateCharCount('summary');
