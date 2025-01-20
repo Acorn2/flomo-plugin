@@ -44,5 +44,6 @@
       "js": ["content/content.js"],
       "css": ["content/content.css"]
     }
-  ]
+  ],
+  "options_page": "options/options.html"
 } 

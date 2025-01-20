@@ -1,7 +1,21 @@
-// Flomo API 地址
-const FLOMO_API = 'https://flomoapp.com/iwh/MjE0MjQyNQ/60fdac850fa4a0fcbbddf6f445d01667/';
-
 document.addEventListener('DOMContentLoaded', async () => {
+  console.log('DOM Content Loaded');
+
+  // 添加这些调试代码
+  console.log('所有按钮元素:', document.querySelectorAll('button')); // 查看所有按钮
+  console.log('所有带有 class 的元素:', document.querySelectorAll('[class]')); // 查看所有带类名的元素
+
+  // 获取存储的设置
+  const settings = await chrome.storage.sync.get(['webhookUrl', 'defaultTag']);
+  const FLOMO_API = settings.webhookUrl;
+  const DEFAULT_TAG = settings.defaultTag || '#Chrome阅读笔记'; // 设置默认值
+
+  // 如果没有配置 Webhook URL，提示用户配置
+  if (!FLOMO_API) {
+    showMessage('请先在设置页面配置 Webhook URL', 'error');
+    return;
+  }
+
   // 获取当前标签页信息并填充到对应输入框
   chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
     const currentTab = tabs[0];
@@ -9,9 +23,64 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('link').value = currentTab.url || '';
   });
 
-  // 设置字数统计监听
-  setupCharCount('summary');
-  setupCharCount('thoughts');
+  // 字数统计功能
+  function updateCharCount(elementId) {
+    const textarea = document.getElementById(elementId);
+    if (!textarea) return;
+    
+    // 找到对应的字数统计元素
+    const countSpan = textarea.parentElement.querySelector('.char-count');
+    if (!countSpan) {
+      // 如果不存在字数统计元素，创建一个
+      const span = document.createElement('span');
+      span.className = 'char-count';
+      textarea.parentElement.appendChild(span);
+    }
+    
+    const count = textarea.value.length;
+    const maxLength = textarea.maxLength;
+    
+    // 更新字数统计显示
+    const countElement = textarea.parentElement.querySelector('.char-count');
+    if (countElement) {
+      countElement.textContent = `${count}/${maxLength}`;
+    }
+  }
+
+  // 为摘要和感想输入框添加字数统计
+  const textareas = ['summary', 'thoughts'];
+  
+  textareas.forEach(id => {
+    const textarea = document.getElementById(id);
+    if (textarea) {
+      // 初始化字数统计
+      updateCharCount(id);
+      
+      // 添加输入事件监听
+      textarea.addEventListener('input', () => {
+        updateCharCount(id);
+      });
+    }
+  });
+
+  // 修改设置按钮的选择器
+  const settingsBtn = document.querySelector('button.icon-btn.settings-btn');
+  console.log('找到设置按钮:', settingsBtn);
+
+  if (!settingsBtn) {
+    console.error('未找到设置按钮元素');
+    return;
+  }
+
+  settingsBtn.addEventListener('click', async () => {
+    console.log('设置按钮被点击');
+    try {
+      await chrome.runtime.openOptionsPage();
+      window.close();
+    } catch (error) {
+      console.error('打开设置页面失败:', error);
+    }
+  });
 
   // 提交按钮事件
   document.getElementById('submit').addEventListener('click', async () => {
@@ -44,8 +113,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       contentParts.push('\n个人感想：\n\n' + thoughts);
     }
 
-    // 添加标签 - 可选
-    contentParts.push('\n#Chrome阅读笔记');
+    // 添加标签 - 使用存储的默认标签
+    contentParts.push(`\n${DEFAULT_TAG}`);
 
     // 将所有部分用换行符连接
     const content = contentParts.join('\n');
@@ -105,21 +174,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     console.log('AI 总结功能待实现');
   });
 });
-
-// 设置字数统计
-function setupCharCount(elementId) {
-  const textarea = document.getElementById(elementId);
-  textarea.addEventListener('input', () => updateCharCount(elementId));
-  updateCharCount(elementId);
-}
-
-// 更新字数统计
-function updateCharCount(elementId) {
-  const textarea = document.getElementById(elementId);
-  const count = textarea.value.length;
-  const maxLength = textarea.maxLength;
-  textarea.nextElementSibling.textContent = `${count}/${maxLength}`;
-}
 
 // 显示消息提示
 function showMessage(message, type) {

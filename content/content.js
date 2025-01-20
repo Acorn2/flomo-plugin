@@ -37,7 +37,7 @@ function initializePanel() {
 }
 
 // 监听来自 background.js 的消息
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   if (request.action === 'togglePanel') {
     // 确保面板已初始化
     if (!document.getElementById('flomo-panel')) {
@@ -46,8 +46,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     togglePanel();
     // 发送响应
     sendResponse({success: true});
-    return true; // 表示会异步发送响应
   }
+  // 必须返回 true 以支持异步响应
+  return true;
 });
 
 // 页面加载完成后初始化

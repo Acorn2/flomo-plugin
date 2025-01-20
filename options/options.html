@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SnapFlomo 设置</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <h1>SnapFlomo 设置</h1>
+    
+    <div class="section">
+      <p class="notice">此功能需要flomo会员，欢迎支持这款AI产品真诚重度使用的产品，获取专属记录API: 个人账号--》扩展中心 & API</p>
+    </div>
+
+    <div class="section">
+      <h2>Webhook 设置</h2>
+      <label>Flomo Webhook URL:</label>
+      <input type="text" id="webhookUrl" placeholder="请输入你的 Flomo Webhook URL">
+    </div>
+
+    <div class="section">
+      <h2>默认标签</h2>
+      <label>默认标签:</label>
+      <input type="text" id="defaultTag" placeholder="输入默认标签，例如: #Chrome阅读笔记">
+    </div>
+
+    <div class="section">
+      <h2>快捷键设置</h2>
+      <div class="shortcut-item">
+        <span>当前快捷键：</span>
+        <code>Alt+F</code>
+        <button class="btn-secondary">查看修改方法</button>
+      </div>
+      <p class="tip">点击按钮查看如何修改快捷键，你可以在 Chrome 扩展管理页面中自定义快捷键。</p>
+    </div>
+
+    <div class="section">
+      <h2>主题设置</h2>
+      <div class="theme-toggle">
+        <span>🎄 圣诞主题：</span>
+        <label class="switch">
+          <input type="checkbox" id="themeToggle">
+          <span class="slider"></span>
+        </label>
+        <span class="description">开启后将显示圣诞节主题样式</span>
+      </div>
+    </div>
+
+    <button id="saveSettings" class="btn-primary">保存设置</button>
+    
+    <div class="footer">
+      Power By <a href="#">hresh</a>
+    </div>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html> 

@@ -13,12 +13,10 @@ body {
 
 /* 容器样式 */
 .container {
-  width: 360px;
-  max-height: 600px;
-  overflow-y: auto;
-  background-color: #fff;
-  border-radius: 8px;
-  padding-bottom: 16px;
+  width: 400px;
+  min-height: 580px;
+  padding: 16px;
+  background: #fff;
 }
 
 /* 头部样式 */
@@ -26,95 +24,106 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
   border-bottom: 1px solid #eee;
 }
 
 .header h1 {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* 图标按钮样式 */
+.icon-btn {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  border-radius: 6px;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: #f5f5f5;
   color: #333;
 }
 
-.close-btn {
+/* AI总结按钮样式 */
+.ai-btn {
+  display: flex;
+  align-items: center;
+  padding: 6px 12px;
+  background: #f0f7ff;
+  border: 1px solid #e1efff;
+  border-radius: 6px;
+  color: #1890ff;
+  font-size: 13px;
   cursor: pointer;
-  font-size: 20px;
-  color: #999;
+  transition: all 0.2s;
 }
 
-/* 输入组样式 */
-.input-group {
-  margin: 8px 16px;
-  position: relative;
+.ai-btn:hover {
+  background: #e6f4ff;
+  border-color: #1890ff;
 }
 
-.input-group label {
-  display: block;
-  margin-bottom: 4px;
-  font-size: 14px;
-  color: #666;
+.ai-icon {
+  margin-right: 4px;
 }
 
-/* 标签样式 */
-label {
+/* 标签行样式 */
+.label-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
+}
+
+.label-text {
   font-size: 14px;
-  color: #666;
+  color: #333;
+  font-weight: 500;
 }
 
-.ai-btn {
-  color: #6e6aff;
-  font-size: 12px;
-  cursor: pointer;
+/* 输入框容器样式 */
+.textarea-container {
+  position: relative;
+  margin-bottom: 16px;
 }
 
-/* 文本框样式 */
-#title {
+textarea {
   width: 100%;
-  height: 36px;
-  padding: 8px;
+  padding: 12px;
   border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  resize: none;
-  background-color: #f5f5f5;
-}
-
-#link {
-  width: 100%;
-  height: 36px;
-  padding: 8px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  resize: none;
-  background-color: #f5f5f5;
-}
-
-#summary, #thoughts {
-  width: 100%;
-  height: 100px;
-  padding: 8px;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.6;
   resize: vertical;
-  min-height: 100px;
-  max-height: 200px;
 }
 
 textarea:focus {
   outline: none;
-  border-color: #6e6aff;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24,144,255,0.1);
 }
 
-textarea::placeholder {
-  color: #999;
+#title, #link {
+  min-height: 40px;
+  background: #f9f9f9;
+  margin-bottom: 8px;
 }
 
-#titleAndLink {
-  background-color: #f5f5f5;
-  min-height: 60px;
+#summary, #thoughts {
+  min-height: 120px;
 }
 
 /* 字数统计样式 */
@@ -124,70 +133,71 @@ textarea::placeholder {
   bottom: 8px;
   font-size: 12px;
   color: #999;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 2px 4px;
+  background: rgba(255,255,255,0.9);
+  padding: 2px 6px;
+  border-radius: 4px;
 }
 
 /* 提交按钮样式 */
-#submit {
-  display: block;
-  width: calc(100% - 32px);
-  margin: 12px 16px;
+.submit-btn {
+  width: 100%;
   padding: 12px;
+  background: #42c02e;
   border: none;
   border-radius: 8px;
-  background-color: #42c02e;
   color: white;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 20px 0;
+  transition: all 0.2s;
 }
 
-#submit:hover {
-  opacity: 0.9;
+.submit-btn:hover {
+  background: #3aa928;
 }
 
 /* 快捷键说明样式 */
 .shortcuts-info {
-  margin: 8px 16px;
-  padding-top: 8px;
-  border-top: 1px solid #eee;
+  margin-top: 20px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
 }
 
-.shortcuts-info p {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.shortcuts-info ul {
-  list-style: none;
-}
-
-.shortcuts-info li {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-/* 消息提示样式 */
-.message {
-  position: fixed;
-  top: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 8px 16px;
-  border-radius: 4px;
-  color: white;
+.shortcuts-header {
   font-size: 14px;
-  z-index: 1000;
+  color: #666;
+  margin-bottom: 12px;
 }
 
-.message.success {
-  background-color: #42c02e;
+.shortcuts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-.message.error {
-  background-color: #f44336;
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shortcut-key {
+  padding: 4px 8px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  font-family: monospace;
+}
+
+.shortcut-desc {
+  font-size: 13px;
+  color: #666;
 } 
