@@ -1,0 +1,97 @@
+/* 默认主题 - 移除所有圣诞相关元素 */
+:root {
+  --primary-color: #1890ff;
+  --primary-hover: #40a9ff;
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --border-color: #dddddd;
+  --button-text-color: #ffffff;
+  --input-background: #ffffff;
+  --header-icon: none;  /* 默认不显示任何图标 */
+  --submit-icon: none;  /* 默认不显示任何图标 */
+  --card-background: #f8f9fa;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --error-color: #ff4d4f;
+  --button-shadow: 0 2px 6px rgba(24, 144, 255, 0.2);
+  
+  /* popup 专用变量 */
+  --popup-bg: #ffffff;
+  --popup-text: #333333;
+  --popup-border: #e8e8e8;
+  --popup-button-bg: #1890ff;
+  --popup-button-text: #ffffff;
+}
+
+/* 圣诞主题 */
+[data-theme="christmas"] {
+  --primary-color: #d32f2f;
+  --primary-hover: #ef5350;
+  --background-color: #fff5f5;
+  --text-color: #2c3e50;
+  --border-color: #ffcdd2;
+  --button-text-color: #ffffff;
+  --input-background: #ffffff;
+  --header-icon: '🎄';  /* 圣诞树图标 */
+  --submit-icon: '🎄';  /* 圣诞树图标 */
+  --card-background: #ffffff;
+  --success-color: #388e3c;
+  --warning-color: #f57c00;
+  --error-color: #d32f2f;
+  
+  /* 圣诞特殊样式 */
+  --theme-icon: '🎄';
+  --theme-background-image: url('christmas-bg.png');
+  
+  /* popup 专用变量 */
+  --popup-bg: #fff5f5;
+  --popup-text: #2c3e50;
+  --popup-border: #ffcdd2;
+  --popup-button-bg: #d32f2f;
+  --popup-button-text: #ffffff;
+  --button-shadow: 0 2px 6px rgba(211, 47, 47, 0.2);
+}
+
+/* 新年主题 */
+[data-theme="newyear"] {
+  --primary-color: #f5222d;
+  --primary-hover: #ff4d4f;
+  --background-color: #fff1f0;
+  --text-color: #262626;
+  --border-color: #ffa39e;
+  --button-text-color: #ffffff;
+  --input-background: #ffffff;
+  --header-icon: '🎊';
+  --submit-icon: '🧧';
+  --card-background: #ffffff;
+  --success-color: #a0d911;
+  --warning-color: #faad14;
+  --error-color: #f5222d;
+  
+  /* 新年特殊样式 */
+  --theme-icon: '🎊';
+  --theme-background-image: url('newyear-bg.png');
+  --button-shadow: 0 2px 6px rgba(245, 34, 45, 0.2);
+}
+
+/* 蛇年主题 */
+[data-theme="snake"] {
+  --primary-color: #722ed1;
+  --primary-hover: #9254de;
+  --background-color: #f9f0ff;
+  --text-color: #262626;
+  --border-color: #d3adf7;
+  --button-text-color: #ffffff;
+  --input-background: #ffffff;
+  --header-icon: '🐍';
+  --submit-icon: '🐍';
+  --card-background: #ffffff;
+  --success-color: #52c41a;
+  --warning-color: #faad14;
+  --error-color: #ff4d4f;
+  
+  /* 蛇年特殊样式 */
+  --theme-icon: '🐍';
+  --theme-background-image: url('snake-bg.png');
+  --button-shadow: 0 2px 6px rgba(114, 46, 209, 0.2);
+} 

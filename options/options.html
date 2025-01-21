@@ -4,55 +4,167 @@
   <meta charset="UTF-8">
   <title>SnapFlomo 设置</title>
   <link rel="stylesheet" href="options.css">
+  <link rel="stylesheet" href="../styles/themes.css">
 </head>
 <body>
   <div class="container">
     <h1>SnapFlomo 设置</h1>
     
     <div class="section">
-      <p class="notice">此功能需要flomo会员，欢迎支持这款AI产品真诚重度使用的产品，获取专属记录API: 个人账号--》扩展中心 & API</p>
+      <div class="notice">
+        <span class="notice-icon">ℹ️</span>
+        <span class="notice-text">此功能需要flomo会员，欢迎支持这款AI产品真诚重度使用的产品，获取专属记录API: 个人账号--》扩展中心 & API</span>
+      </div>
     </div>
 
     <div class="section">
       <h2>Webhook 设置</h2>
-      <label>Flomo Webhook URL:</label>
-      <input type="text" id="webhookUrl" placeholder="请输入你的 Flomo Webhook URL">
+      <div class="setting-box">
+        <div class="input-group required-field">
+          <label>Flomo Webhook URL:</label>
+          <div class="input-wrapper">
+            <input type="text" id="webhookUrl" placeholder="请输入你的 Flomo Webhook URL">
+          </div>
+        </div>
+        <div class="api-links">
+          <a href="https://v.flomoapp.com/mine?source=incoming_webhook" target="_blank" class="api-link">
+            <span>获取 Webhook URL</span>
+            <svg viewBox="0 0 24 24" width="14" height="14">
+              <path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+            </svg>
+          </a>
+        </div>
+      </div>
     </div>
 
     <div class="section">
       <h2>默认标签</h2>
-      <label>默认标签:</label>
-      <input type="text" id="defaultTag" placeholder="输入默认标签，例如: #Chrome阅读笔记">
+      <div class="setting-box">
+        <div class="input-group">
+          <label>默认标签:</label>
+          <div class="input-wrapper">
+            <input type="text" id="defaultTag" placeholder="#Chrome阅读笔记" value="#Chrome阅读笔记">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>AI 设置</h2>
+      <div class="ai-settings">
+        <div class="ai-service-select">
+          <label>选择 AI 服务：</label>
+          <select id="aiService" class="select-styled">
+            <option value="zhipu">智谱 AI</option>
+            <option value="deepseek">Deepseek AI</option>
+          </select>
+        </div>
+        <div class="api-key-input">
+          <label>API Key:</label>
+          <div class="input-wrapper">
+            <input type="password" id="apiKey" placeholder="请输入 API Key">
+            <button class="toggle-password" title="显示/隐藏">
+              <svg viewBox="0 0 24 24" width="16" height="16">
+                <path fill="currentColor" d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="api-links">
+        <a href="https://open.bigmodel.cn/usercenter/apikeys" target="_blank" class="api-link">
+          <span>获取智谱 AI Key</span>
+          <svg viewBox="0 0 24 24" width="14" height="14">
+            <path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+          </svg>
+        </a>
+        <a href="https://platform.deepseek.com/" target="_blank" class="api-link">
+          <span>获取 Deepseek Key</span>
+          <svg viewBox="0 0 24 24" width="14" height="14">
+            <path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+          </svg>
+        </a>
+      </div>
     </div>
 
     <div class="section">
       <h2>快捷键设置</h2>
-      <div class="shortcut-item">
-        <span>当前快捷键：</span>
-        <code>Alt+F</code>
-        <button class="btn-secondary">查看修改方法</button>
+      <div class="setting-box">
+        <div class="notice">
+          <span class="notice-icon">ℹ️</span>
+          <span class="notice-text">首次使用需要手动激活快捷键，否则快捷键无法使用</span>
+        </div>
+        
+        <div class="shortcut-info">
+          <div class="shortcut-row">
+            <span class="platform-label">Mac:</span>
+            <code class="shortcut-key">Command + Shift + F</code>
+          </div>
+          <div class="shortcut-row">
+            <span class="platform-label">Windows:</span>
+            <code class="shortcut-key">Alt + Shift + F</code>
+          </div>
+        </div>
+        
+        <div class="shortcut-actions">
+          <button class="btn-secondary" id="viewShortcutBtn">
+            <span>激活快捷键</span>
+            <svg viewBox="0 0 24 24" width="14" height="14">
+              <path fill="currentColor" d="M14,3V5H17.59L7.76,14.83L9.17,16.24L19,6.41V10H21V3M19,19H5V5H12V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V12H19V19Z" />
+            </svg>
+          </button>
+        </div>
+        
+        <div class="shortcut-tips">
+          <p class="tip">1. 点击上方按钮前往 Chrome 扩展快捷键设置页面</p>
+          <p class="tip">2. 找到 "SnapFlomo" 并点击输入框</p>
+          <p class="tip">3. 按下对应的快捷键组合进行设置</p>
+        </div>
       </div>
-      <p class="tip">点击按钮查看如何修改快捷键，你可以在 Chrome 扩展管理页面中自定义快捷键。</p>
     </div>
 
     <div class="section">
       <h2>主题设置</h2>
-      <div class="theme-toggle">
-        <span>🎄 圣诞主题：</span>
-        <label class="switch">
-          <input type="checkbox" id="themeToggle">
-          <span class="slider"></span>
-        </label>
-        <span class="description">开启后将显示圣诞节主题样式</span>
+      <div class="setting-box">
+        <div class="theme-selector">
+          <label>选择主题:</label>
+          <div class="theme-options">
+            <div class="theme-card" data-theme="default">
+              <div class="theme-preview default-theme">
+                <span class="theme-icon">🎨</span>
+              </div>
+              <span class="theme-name">默认主题</span>
+            </div>
+            <div class="theme-card" data-theme="christmas">
+              <div class="theme-preview christmas-theme">
+                <span class="theme-icon">🎄</span>
+              </div>
+              <span class="theme-name">圣诞主题</span>
+            </div>
+            <div class="theme-card" data-theme="newyear">
+              <div class="theme-preview newyear-theme">
+                <span class="theme-icon">🎊</span>
+              </div>
+              <span class="theme-name">新年主题</span>
+            </div>
+            <div class="theme-card" data-theme="snake">
+              <div class="theme-preview snake-theme">
+                <span class="theme-icon">🐍</span>
+              </div>
+              <span class="theme-name">蛇年主题</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <button id="saveSettings" class="btn-primary">保存设置</button>
     
     <div class="footer">
-      Power By <a href="#">hresh</a>
+      <span>Power By</span>
+      <a href="https://juejin.cn/user/2664871918047063" class="author-link">hresh</a>
     </div>
   </div>
-  <script src="options.js"></script>
+  <script type="module" src="options.js"></script>
 </body>
 </html> 

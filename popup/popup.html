@@ -3,11 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="popup.css">
+  <link rel="stylesheet" href="../styles/themes.css">
+  <style>
+    /* 添加基础样式确保内容可见 */
+    body {
+      width: 360px;
+      min-height: 400px;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      padding: 16px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>SnapFlomo 🎄</h1>
+      <h1>SnapFlomo</h1>
       <div class="header-actions">
         <button class="icon-btn settings-btn" title="设置">
           <svg viewBox="0 0 24 24" width="20" height="20">
@@ -40,8 +53,8 @@
           </button>
         </div>
         <div class="textarea-container">
-          <textarea id="summary" maxlength="1000" placeholder="粘贴原文摘要..."></textarea>
-          <span class="char-count">0/1000</span>
+          <textarea id="summary" maxlength="1000" placeholder="可以粘贴原文中重要的内容，或点击「AI总结」自动提取网页内容并总结..."></textarea>
+          <span class="char-count">0/3000</span>
         </div>
       </div>
       
@@ -57,23 +70,10 @@
     </div>
 
     <button id="submit" class="submit-btn">
-      <span class="emoji">🎄</span> 提交到 Flomo <span class="arrow">→</span>
+      提交到 Flomo <span class="arrow">→</span>
     </button>
 
-    <div class="shortcuts-info">
-      <div class="shortcuts-header">快捷键说明：</div>
-      <div class="shortcuts-list">
-        <div class="shortcut-item">
-          <span class="shortcut-key">Ctrl/Command + Shift + F</span>
-          <span class="shortcut-desc">打开插件</span>
-        </div>
-        <div class="shortcut-item">
-          <span class="shortcut-key">Ctrl/Command + Enter</span>
-          <span class="shortcut-desc">提交内容</span>
-        </div>
-      </div>
-    </div>
   </div>
-  <script src="popup.js"></script>
+  <script type="module" src="popup.js"></script>
 </body>
 </html> 

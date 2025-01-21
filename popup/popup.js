@@ -1,27 +1,64 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log('DOM Content Loaded');
+import { ZhipuAIService } from '../services/ai/index.js';
+import { AIServiceFactory, AIServiceType } from '../services/ai/index.js';
 
-  // 添加这些调试代码
-  console.log('所有按钮元素:', document.querySelectorAll('button')); // 查看所有按钮
-  console.log('所有带有 class 的元素:', document.querySelectorAll('[class]')); // 查看所有带类名的元素
+document.addEventListener('DOMContentLoaded', async () => {
+  // 初始化时获取主题
+  const { theme } = await chrome.storage.sync.get('theme');
+  if (theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+  }
+
+  // 监听存储变化而不是消息
+  chrome.storage.onChanged.addListener((changes, namespace) => {
+    if (namespace === 'sync' && changes.theme) {
+      const newTheme = changes.theme.newValue;
+      document.documentElement.setAttribute('data-theme', newTheme || 'default');
+    }
+  });
 
   // 获取存储的设置
   const settings = await chrome.storage.sync.get(['webhookUrl', 'defaultTag']);
   const FLOMO_API = settings.webhookUrl;
   const DEFAULT_TAG = settings.defaultTag || '#Chrome阅读笔记'; // 设置默认值
 
-  // 如果没有配置 Webhook URL，提示用户配置
+
+  // 如果没有配置 Webhook URL，显示警告提示
   if (!FLOMO_API) {
+    // 显示错误消息
     showMessage('请先在设置页面配置 Webhook URL', 'error');
-    return;
+    
+    // 添加警告提示条
+    const warningDiv = document.createElement('div');
+    warningDiv.className = 'warning-message';
+    warningDiv.innerHTML = `
+      <div class="warning-content">
+        ⚠️ 请先配置 Webhook URL
+        <button class="config-btn">去配置</button>
+      </div>
+    `;
+
+    // 插入到提交按钮之前
+    const submitBtn = document.getElementById('submit');
+    submitBtn.parentNode.insertBefore(warningDiv, submitBtn);
+    
+    // 禁用提交按钮
+    submitBtn.disabled = true;
+    submitBtn.title = '请先配置 Webhook URL';
+    
+    // 为配置按钮添加点击事件
+    warningDiv.querySelector('.config-btn').addEventListener('click', async () => {
+      await chrome.runtime.openOptionsPage();
+      window.close();
+    });
   }
 
   // 获取当前标签页信息并填充到对应输入框
-  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+  chrome.tabs.query({active: true, currentWindow: true}, async (tabs) => {
     const currentTab = tabs[0];
     document.getElementById('title').value = currentTab.title || '';
     document.getElementById('link').value = currentTab.url || '';
   });
+
 
   // 字数统计功能
   function updateCharCount(elementId) {
@@ -62,6 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
   });
+
 
   // 修改设置按钮的选择器
   const settingsBtn = document.querySelector('button.icon-btn.settings-btn');
@@ -129,17 +167,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (response.ok) {
-        showMessage('保存成功！', 'success');
+        // 显示成功弹窗
+        showToast('笔记已保存到 Flomo', 'success');
+        
         // 清空输入框，但保留标题和链接
         document.getElementById('summary').value = '';
         document.getElementById('thoughts').value = '';
         updateCharCount('summary');
         updateCharCount('thoughts');
       } else {
-        showMessage('发送失败，请重试', 'error');
+        showToast('发送失败，请重试', 'error');
       }
     } catch (error) {
-      showMessage('发送失败，请检查网络连接', 'error');
+      showToast('发送失败，请检查网络连接', 'error');
     }
   });
 
@@ -168,12 +208,136 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.close();
   });
 
-  // AI 总结按钮功能（如果需要）
-  document.querySelector('.ai-btn').addEventListener('click', () => {
-    // 添加 AI 总结功能
-    console.log('AI 总结功能待实现');
+  // 获取 AI 配置信息
+  async function getAIConfig() {
+    try {
+      const settings = await chrome.storage.sync.get(['aiService', 'apiKey']);
+      return {
+        service: settings.aiService || 'zhipu', // 默认使用智谱 AI
+        apiKey: settings.apiKey || ''
+      };
+    } catch (error) {
+      console.error('获取 AI 配置失败:', error);
+      throw new Error('获取 AI 配置失败');
+    }
+  }
+
+  // AI 总结功能
+  async function summarizeText() {
+    const summaryTextarea = document.getElementById('summary');
+    let textToSummarize = summaryTextarea.value.trim();
+
+    // 如果文本框为空，则尝试获取页面内容
+    if (!textToSummarize) {
+      try {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        const [{ result }] = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          function: getPageContent
+        });
+        
+        if (result) {
+          textToSummarize = result;
+        } else {
+          showMessage('未能获取到页面内容', 'error');
+          return;
+        }
+      } catch (error) {
+        console.error('获取页面内容失败:', error);
+        showMessage('获取页面内容失败，请手动输入或复制内容', 'error');
+        return;
+      }
+    }
+
+    const aiBtn = document.querySelector('.ai-btn');
+    const originalBtnText = aiBtn.innerHTML;
+    
+    aiBtn.innerHTML = '<span class="ai-icon">⏳</span>正在总结...';
+    aiBtn.disabled = true;
+
+    try {
+      const { service, apiKey } = await getAIConfig();
+      
+      if (!apiKey) {
+        showMessage('请先在设置页面配置对应服务的 API Key', 'error');
+        return;
+      }
+
+      const aiService = AIServiceFactory.create(service, apiKey);
+      const prompt = `#输入：\n\n${textToSummarize}`;
+      const summary = await aiService.summarize(prompt);
+      
+      summaryTextarea.value = summary;
+      updateCharCount('summary');
+      showMessage('AI总结完成！', 'success');
+
+    } catch (error) {
+      handleAIError(error);
+    } finally {
+      aiBtn.innerHTML = originalBtnText;
+      aiBtn.disabled = false;
+    }
+  }
+
+  // 添加错误处理函数
+  function handleAIError(error) {
+    console.error('AI 总结失败:', error);
+    
+    if (error.message.includes('API Key')) {
+      showMessage('API Key无效或已过期，请检查设置', 'error');
+    } else if (error.message.includes('network')) {
+      showMessage('网络连接失败，请检查网络设置', 'error');
+    } else {
+      showMessage(`AI服务错误: ${error.message}`, 'error');
+    }
+  }
+
+  // 添加按钮点击事件
+  document.querySelector('.ai-btn').addEventListener('click', summarizeText);
+
+  // 添加标签页切换监听
+  chrome.tabs.onActivated.addListener(async (activeInfo) => {
+    window.close();
+  });
+
+  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    if (changeInfo.status === 'complete') {
+      window.close();
+    }
   });
 });
+
+// 获取页面内容的函数
+function getPageContent() {
+  // 获取主要内容
+  const article = document.querySelector('article') || document.querySelector('main') || document.body;
+  
+  // 移除不需要的元素
+  const clonedArticle = article.cloneNode(true);
+  const elementsToRemove = clonedArticle.querySelectorAll('script, style, nav, header, footer, iframe, .ad, .advertisement, .social-share');
+  elementsToRemove.forEach(el => el.remove());
+  
+  // 获取所有段落文本
+  const paragraphs = Array.from(clonedArticle.querySelectorAll('p, h1, h2, h3, h4, h5, h6'))
+    .map(el => el.textContent.trim())
+    .filter(text => text.length > 0);
+  
+  // 如果没有找到段落，尝试获取选中的文本
+  if (paragraphs.length === 0) {
+    const selectedText = window.getSelection().toString().trim();
+    if (selectedText) {
+      return selectedText;
+    }
+    // 如果没有选中的文本，获取可见的文本内容
+    return Array.from(clonedArticle.querySelectorAll('*'))
+      .map(el => el.textContent.trim())
+      .filter(text => text.length > 0)
+      .join('\n');
+  }
+  
+  // 合并段落，添加适当的分隔
+  return paragraphs.join('\n\n');
+}
 
 // 显示消息提示
 function showMessage(message, type) {
@@ -184,5 +348,42 @@ function showMessage(message, type) {
 
   setTimeout(() => {
     messageDiv.remove();
+  }, 3000);
+}
+
+// 添加 Toast 提示函数
+function showToast(message, type = 'info') {
+  // 移除可能存在的旧 toast
+  const existingToast = document.querySelector('.toast');
+  if (existingToast) {
+    existingToast.remove();
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  
+  // 根据类型选择图标
+  const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+  
+  toast.innerHTML = `
+    <div class="toast-content">
+      <span class="toast-icon">${icon}</span>
+      <span class="toast-message">${message}</span>
+    </div>
+  `;
+  
+  document.body.appendChild(toast);
+
+  // 添加显示动画
+  requestAnimationFrame(() => {
+    toast.classList.add('show');
+  });
+
+  // 3秒后自动消失
+  setTimeout(() => {
+    toast.classList.add('hide');
+    setTimeout(() => {
+      toast.remove();
+    }, 300);
   }, 3000);
 } 

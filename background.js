@@ -1,15 +1,11 @@
 // 监听扩展图标点击
 chrome.action.onClicked.addListener(async (tab) => {
-  try {
-    // 使用 scripting API 向当前标签页注入代码
-    await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      function: togglePanel
-    });
-  } catch (error) {
-    console.error('Error:', error);
-  }
+  // 打开侧边栏
+  await chrome.sidePanel.open({ windowId: tab.windowId });
 });
+
+// 确保侧边栏保持打开状态
+chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
 
 // 切换面板显示的函数
 function togglePanel() {
