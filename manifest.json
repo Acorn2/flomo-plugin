@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Flomo Quick Save",
+  "name": "SnapFlomo",
   "version": "1.0",
   "description": "Sync article content to Flomo with a sidebar interface",
   "icons": {
@@ -13,7 +13,8 @@
     "storage",
     "commands",
     "scripting",
-    "sidePanel"
+    "sidePanel",
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>",
@@ -44,8 +45,9 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
+      "css": ["content/content.css"],
       "js": ["content/content.js"],
-      "css": ["content/content.css"]
+      "run_at": "document_end"
     }
   ],
   "options_page": "options/options.html",
@@ -54,5 +56,16 @@
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "web_accessible_resources": [{
+    "resources": [
+      "icons/*",
+      "assets/*",
+      "lib/*"
+    ],
+    "matches": ["<all_urls>"]
+  }],
+  "chrome_url_overrides": {
+    "statistics": "statistics/statistics.html"
   }
 } 

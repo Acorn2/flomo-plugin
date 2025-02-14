@@ -2,6 +2,46 @@ import { ZhipuAIService } from '../services/ai/index.js';
 import { AIServiceFactory, AIServiceType } from '../services/ai/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  let port;
+  
+  function connectToBackground() {
+    port = chrome.runtime.connect({ name: 'popup' });
+    
+    port.onDisconnect.addListener(() => {
+      console.log('连接断开，尝试重新连接');
+      setTimeout(connectToBackground, 1000); // 1秒后尝试重新连接
+    });
+    
+    port.onMessage.addListener((request) => {
+      if (request.action === 'resetContent') {
+        document.getElementById('title').value = request.data.title || '';
+        document.getElementById('link').value = request.data.url || '';
+        
+        // 清空摘要和感想
+        document.getElementById('summary').value = '';
+        document.getElementById('thoughts').value = '';
+        
+        // 更新字数统计
+        ['summary', 'thoughts'].forEach(id => {
+          const textarea = document.getElementById(id);
+          if (textarea) {
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        });
+      }
+    });
+  }
+  
+  // 初始建立连接
+  connectToBackground();
+  
+  // 通知 background 脚本 popup 已打开
+  port.postMessage({ action: 'popupOpened' });
+
+  // 移除原有的 Flomo Quick Save 标题层
+  const title = document.querySelector('h1');
+  title.textContent = 'SnapFlomo';
+
   // 初始化时获取主题
   const { theme } = await chrome.storage.sync.get('theme');
   if (theme) {
@@ -120,7 +160,33 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // 提交按钮事件
+  // 修改标签提取函数
+  async function extractSiteTagFromTitle(title) {
+    // 获取设置
+    const settings = await chrome.storage.sync.get(['enableSiteTag', 'defaultTag']);
+    const DEFAULT_TAG = settings.defaultTag || '#Chrome阅读笔记';
+    
+    // 如果未启用网站标签解析，直接返回默认标签
+    if (!settings.enableSiteTag) {
+      return DEFAULT_TAG;
+    }
+    
+    try {
+      // 使用正则表达式匹配最后一个横杠后的内容
+      const match = title.match(/.*[-—]\s*([^-—]+)$/);
+      if (match && match[1]) {
+        // 清理提取的网站名称（去除空格和特殊字符）
+        const siteName = match[1].trim();
+        // 如果提取的内容不为空，返回带#的标签
+        return siteName ? `#${siteName}` : DEFAULT_TAG;
+      }
+      return DEFAULT_TAG;
+    } catch {
+      return DEFAULT_TAG;
+    }
+  }
+
+  // 修改提交按钮事件处理
   document.getElementById('submit').addEventListener('click', async () => {
     // 获取所有输入内容
     const title = document.getElementById('title').value;
@@ -128,34 +194,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const summary = document.getElementById('summary').value;
     const thoughts = document.getElementById('thoughts').value;
 
-    // 组装发送内容，按照特定格式
+    // 获取网站标签
+    const siteTag = await extractSiteTagFromTitle(title);
+    
+    // 组装发送内容
     const contentParts = [];
     
-    // 添加标题
-    if (title) {
-      contentParts.push(title);
-    }
-
-    // 添加链接 - 使用小括号包裹
-    if (link) {
-      contentParts.push(`(${link})`);
-    }
-
-    // 添加原文摘要 - 如果有内容，添加标题和内容
-    if (summary) {
-      contentParts.push('\n原文摘要：\n\n' + summary);
-    }
-
-    // 添加个人感想 - 如果有内容，添加标题和内容
-    if (thoughts) {
-      contentParts.push('\n个人感想：\n\n' + thoughts);
-    }
-
-    // 添加标签 - 使用存储的默认标签
-    contentParts.push(`\n${DEFAULT_TAG}`);
-
-    // 将所有部分用换行符连接
-    const content = contentParts.join('\n');
+    if (title) contentParts.push(title);
+    if (link) contentParts.push(`(${link})`);
+    if (summary) contentParts.push('\n原文摘要：\n\n' + summary);
+    if (thoughts) contentParts.push('\n个人感想：\n\n' + thoughts);
+    
+    // 添加标签
+    contentParts.push(`\n${siteTag}`);
 
     try {
       const response = await fetch(FLOMO_API, {
@@ -163,10 +214,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ content })
+        body: JSON.stringify({ content: contentParts.join('\n') })
       });
 
       if (response.ok) {
+        // 保存成功后，立即记录统计数据
+        await recordSaveStat({
+          title,
+          url: link,  // 添加链接
+          tag: siteTag,
+          timestamp: Date.now(),
+          wordCount: (summary + thoughts).length
+        });
+        
         // 显示成功弹窗
         showToast('笔记已保存到 Flomo', 'success');
         
@@ -175,6 +235,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('thoughts').value = '';
         updateCharCount('summary');
         updateCharCount('thoughts');
+        
+        // 更新标签页信息
+        await updateTabInfo();
       } else {
         showToast('发送失败，请重试', 'error');
       }
@@ -182,6 +245,64 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast('发送失败，请检查网络连接', 'error');
     }
   });
+
+  // 优化统计数据记录函数
+  async function recordSaveStat(data) {
+    try {
+      const { saveStats = {} } = await chrome.storage.local.get('saveStats');
+      const now = new Date();
+      const monthKey = `${now.getFullYear()}-${now.getMonth() + 1}`;
+      
+      if (!saveStats[monthKey]) {
+        saveStats[monthKey] = {
+          count: 0,
+          categories: {},
+          recentSaves: [],
+          totalWords: 0,
+          dailyCounts: {}
+        };
+      }
+      
+      const monthData = saveStats[monthKey];
+      const dayKey = now.getDate().toString();
+      
+      // 更新基础统计
+      monthData.count++;
+      monthData.totalWords += data.wordCount || 0;
+      monthData.dailyCounts[dayKey] = (monthData.dailyCounts[dayKey] || 0) + 1;
+      monthData.categories[data.tag] = (monthData.categories[data.tag] || 0) + 1;
+      
+      // 更新最近保存记录，限制为10条
+      monthData.recentSaves.unshift({
+        title: data.title,
+        url: data.url,
+        tag: data.tag,
+        timestamp: now.getTime(),
+        wordCount: data.wordCount || 0
+      });
+      
+      // 确保只保留最近的10条记录
+      if (monthData.recentSaves.length > 10) {
+        monthData.recentSaves = monthData.recentSaves.slice(0, 10);
+      }
+      
+      // 清理超过3个月的数据
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      
+      Object.keys(saveStats).forEach(key => {
+        const [year, month] = key.split('-').map(Number);
+        const dataDate = new Date(year, month - 1);
+        if (dataDate < threeMonthsAgo) {
+          delete saveStats[key];
+        }
+      });
+      
+      await chrome.storage.local.set({ saveStats });
+    } catch (error) {
+      console.error('Failed to save statistics:', error);
+    }
+  }
 
   // 添加键盘快捷键监听
   document.addEventListener('keydown', (e) => {
@@ -201,11 +322,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       e.preventDefault();
       document.getElementById('clear').click();
     }
-  });
-
-  // 添加关闭按钮功能
-  document.querySelector('.close-btn').addEventListener('click', () => {
-    window.close();
   });
 
   // 获取 AI 配置信息
@@ -295,16 +411,96 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 添加按钮点击事件
   document.querySelector('.ai-btn').addEventListener('click', summarizeText);
 
-  // 添加标签页切换监听
-  chrome.tabs.onActivated.addListener(async (activeInfo) => {
-    window.close();
+
+  // 修改消息监听处理
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'fillSelectedText') {
+      const summaryTextarea = document.getElementById('summary');
+      if (summaryTextarea) {
+        if (request.append) {
+          // 如果是追加模式，在现有内容后添加新内容
+          const currentContent = summaryTextarea.value;
+          const newContent = currentContent
+            ? currentContent + '\n\n' + request.text  // 如果已有内容，添加两个换行符
+            : request.text;  // 如果没有内容，直接设置
+          
+          summaryTextarea.value = newContent;
+        } else {
+          // 如果不是追加模式，直接替换内容
+          summaryTextarea.value = request.text;
+        }
+        
+        // 触发 input 事件以更新字数统计
+        summaryTextarea.dispatchEvent(new Event('input', { bubbles: true }));
+        
+        // 将光标移动到文本末尾
+        summaryTextarea.scrollTop = summaryTextarea.scrollHeight;
+        
+        // 发送成功响应
+        sendResponse({ success: true });
+      } else {
+        sendResponse({ success: false });
+      }
+    }
+    return true;
   });
 
-  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-    if (changeInfo.status === 'complete') {
-      window.close();
-    }
-  });
+  // 处理引导提示
+  const guideTooltip = document.getElementById('guide-tooltip');
+  const closeBtn = guideTooltip.querySelector('.guide-close');
+  
+  // 检查是否已经显示过引导
+  const { hasShownGuide } = await chrome.storage.sync.get('hasShownGuide');
+  
+  if (!hasShownGuide) {
+    guideTooltip.style.display = 'flex';
+    
+    // 点击关闭按钮
+    closeBtn.addEventListener('click', async () => {
+      guideTooltip.style.display = 'none';
+      // 记录已显示过引导
+      await chrome.storage.sync.set({ hasShownGuide: true });
+    });
+  } else {
+    guideTooltip.style.display = 'none';
+  }
+
+  // 添加关闭悬浮窗的功能
+  initializeCloseButtons();
+
+  // 初始化关闭按钮事件处理函数
+  function initializeCloseButtons() {
+    const closeButtons = document.querySelectorAll('.x');
+    closeButtons.forEach(button => {
+      button.addEventListener('click', (e) => {
+        // 找到最近的 tooltip 父元素并移除
+        const tooltip = e.target.closest('.tooltip');
+        if (tooltip) {
+          tooltip.remove();
+        }
+      });
+    });
+  }
+
+  // 添加钉子按钮点击事件
+  const pinBtn = document.querySelector('.pin-btn');
+  if (pinBtn) {
+    pinBtn.addEventListener('click', async () => {
+      // 显示提示信息
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip';
+      tooltip.innerHTML = `
+        <span>点击"固定"将SnapFlomo添加到工具栏以便快速访问</span>
+        <button class="x" title="关闭">×</button>
+      `;
+      
+      // 将提示框添加到页面
+      document.body.appendChild(tooltip);
+      
+      // 初始化关闭按钮
+      initializeCloseButtons();
+    });
+  }
 });
 
 // 获取页面内容的函数
@@ -386,4 +582,25 @@ function showToast(message, type = 'info') {
       toast.remove();
     }, 300);
   }, 3000);
-} 
+}
+
+// 添加关闭悬浮窗的功能
+function initializeCloseButtons() {
+  const closeButtons = document.querySelectorAll('.x');
+  
+  closeButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const tooltip = this.closest('.tooltip');
+      if (tooltip) {
+        tooltip.remove(); // 使用 remove() 而不是改变 display
+      }
+    });
+  });
+}
+
+async function updateTabInfo() {
+  const tabs = await chrome.tabs.query({active: true, currentWindow: true});
+  const currentTab = tabs[0];
+  document.getElementById('title').value = currentTab.title || '';
+  document.getElementById('link').value = currentTab.url || '';
+}

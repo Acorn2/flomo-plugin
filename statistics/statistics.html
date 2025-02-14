@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>阅读统计 - SnapFlomo</title>
+  <link rel="stylesheet" href="statistics.css">
+  <link rel="stylesheet" href="../styles/themes.css">
+</head>
+<body>
+  <div class="container">
+    <header class="page-header">
+      <div class="brand">
+        <img src="../icons/icon48.png" alt="SnapFlomo" class="brand-icon">
+        <div class="brand-info">
+          <h1 class="brand-name">SnapFlomo</h1>
+          <span class="brand-desc">你的阅读记录助手</span>
+        </div>
+      </div>
+      
+      <div class="header-content">
+        <h2 class="page-title">阅读统计</h2>
+        <div class="date-selector">
+          <button id="prevMonth" class="month-btn">←</button>
+          <span id="currentMonth">2025年2月</span>
+          <button id="nextMonth" class="month-btn">→</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="stats-cards">
+      <div class="stat-card">
+        <h3>本月保存</h3>
+        <div class="stat-value" id="monthCount">0</div>
+        <div class="stat-trend" id="monthTrend">
+          <span class="trend-icon">↑</span>
+          <span class="trend-value">0%</span>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <h3>累计保存</h3>
+        <div class="stat-value" id="totalCount">0</div>
+      </div>
+      
+      <div class="stat-card">
+        <h3>平均字数</h3>
+        <div class="stat-value" id="avgWords">0</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-container">
+        <h3>分类统计</h3>
+        <div class="chart-wrapper">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+      
+      <div class="chart-container">
+        <h3>保存趋势</h3>
+        <div class="chart-wrapper">
+          <canvas id="trendChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="history-section">
+      <h3>最近保存</h3>
+      <div class="history-list">
+        <div class="history-header">
+          <span class="col-title">标题</span>
+          <span class="col-tag">来源</span>
+          <span class="col-words">字数</span>
+          <span class="col-time">保存时间</span>
+        </div>
+        <div id="recentList"></div>
+      </div>
+    </div>
+  </div>
+  
+  <script src="../lib/chart.min.js"></script>
+  <script src="statistics.js"></script>
+</body>
+</html> 

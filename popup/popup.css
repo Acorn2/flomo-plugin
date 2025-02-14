@@ -20,7 +20,7 @@ body {
   height: 100%;
   width: 100%;
   min-width: 360px;
-  padding: 16px;
+  padding: 12px;
   background: #fff;
   box-sizing: border-box;
   border: 1px solid var(--popup-border);
@@ -39,6 +39,11 @@ body {
 #link {
   width: 100%;
   min-width: 320px;
+  min-height: 32px;
+  background: var(--input-background);
+  margin-bottom: 6px;
+  padding: 8px 12px;
+  font-size: 13px;
 }
 
 /* 优化滚动条样式 */
@@ -60,15 +65,25 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #eee;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--header-background);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  margin-bottom: 12px;
 }
 
-.header h1 {
-  font-size: 18px;
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-left h1 {
+  font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-color);
   margin: 0;
 }
 
@@ -81,16 +96,27 @@ body {
 .icon-btn {
   background: none;
   border: none;
-  padding: 6px;
+  padding: 8px;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px;
   color: #666;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .icon-btn:hover {
-  background: #f5f5f5;
+  background: rgba(0, 0, 0, 0.05);
   color: #333;
+}
+
+.pin-btn {
+  color: #1890ff;
+}
+
+.pin-btn:hover {
+  background: #e6f7ff;
 }
 
 /* AI总结按钮样式 */
@@ -126,11 +152,11 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .label-text {
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
   font-weight: 500;
 }
@@ -354,4 +380,127 @@ textarea {
     max-width: 90%;
     word-break: break-word;
   }
+}
+
+/* 添加引导提示样式 */
+.guide-tooltip {
+  position: fixed;
+  top: 20px;
+  right: 20px; /* 改为右侧显示 */
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 300px;
+}
+
+.guide-tooltip video {
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+}
+
+.guide-text {
+  line-height: 1.5;
+  font-size: 13px;
+}
+
+.guide-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  opacity: 0.6;
+}
+
+.guide-close:hover {
+  opacity: 1;
+}
+
+/* 提示框样式 */
+.tooltip {
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1000;
+}
+
+.tooltip .x {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0 4px;
+  font-size: 16px;
+  line-height: 1;
+}
+
+.tooltip .x:hover {
+  opacity: 0.8;
+}
+
+/* 优化设置按钮样式 */
+.settings-btn {
+  padding: 6px;
+  border-radius: 6px;
+  color: var(--text-color);
+  opacity: 0.7;
+  transition: all 0.2s ease;
+}
+
+.settings-btn:hover {
+  opacity: 1;
+  background-color: var(--hover-background);
+}
+
+.settings-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* 输入组样式优化 */
+.input-group {
+  margin-bottom: 12px;
+}
+
+/* 提示条样式 */
+.notice-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 8px 12px;
+  background-color: #fff7e6;
+  border: 1px solid #ffe7ba;
+  border-radius: 6px;
+  color: #d46b08;
+  font-size: 13px;
+}
+
+.notice-bar svg {
+  flex-shrink: 0;
+  color: #d46b08;
+}
+
+.notice-bar span {
+  line-height: 1.4;
 } 

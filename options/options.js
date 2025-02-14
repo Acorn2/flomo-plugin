@@ -56,6 +56,28 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // 初始加载保存的 API Key
   handleServiceChange();
+
+  // 数据存储说明弹出框控制
+  const modal = document.getElementById('storageInfoModal');
+  const infoIcon = document.getElementById('dataStorageInfo');
+  const closeBtn = document.querySelector('.close-btn');
+
+  // 点击图标显示弹出框
+  infoIcon.addEventListener('click', () => {
+    modal.style.display = 'block';
+  });
+
+  // 点击关闭按钮隐藏弹出框
+  closeBtn.addEventListener('click', () => {
+    modal.style.display = 'none';
+  });
+
+  // 点击弹出框外部区域关闭弹出框
+  window.addEventListener('click', (event) => {
+    if (event.target === modal) {
+      modal.style.display = 'none';
+    }
+  });
 });
 
 // 保存设置到 Chrome 存储
@@ -64,25 +86,25 @@ async function saveSettings() {
   const defaultTag = document.getElementById('defaultTag');
   const apiKey = document.getElementById('apiKey');
   const aiService = document.getElementById('aiService');
+  const enableSiteTag = document.getElementById('enableSiteTag').checked;
 
   resetErrors();
 
-  // 验证必填字段
-  if (!webhookUrl.value.trim() || !apiKey.value.trim()) {
-    !webhookUrl.value.trim() && showFieldError(webhookUrl, '请输入 Webhook URL');
-    !apiKey.value.trim() && showFieldError(apiKey, '请输入 API Key');
+  // 只验证 Webhook URL 是否填写
+  if (!webhookUrl.value.trim()) {
+    showFieldError(webhookUrl, '请输入 Webhook URL');
     return;
   }
 
   try {
-    // 只保存当前选择的服务和对应的 API Key
     await chrome.storage.sync.set({
       webhookUrl: webhookUrl.value.trim(),
       defaultTag: defaultTag.value.trim().startsWith('#') 
         ? defaultTag.value.trim() 
         : `#${defaultTag.value.trim()}`,
       aiService: aiService.value,
-      apiKey: apiKey.value.trim()  // 直接保存当前API Key
+      apiKey: apiKey.value.trim(),
+      enableSiteTag
     });
 
     showMessage('设置已保存成功！', 'success');
@@ -137,7 +159,8 @@ async function loadSettings() {
       'defaultTag', 
       'aiService',
       'zhipuApiKey',
-      'deepseekApiKey'
+      'deepseekApiKey',
+      'enableSiteTag'
     ]);
     
     // 填充表单
@@ -157,6 +180,12 @@ async function loadSettings() {
       const selectedService = aiService.value;
       apiKey.value = settings[`${selectedService}ApiKey`] || '';
     });
+
+    // 只保留存在的 checkbox
+    const enableSiteTag = document.getElementById('enableSiteTag');
+    if (enableSiteTag) {
+      enableSiteTag.checked = settings.enableSiteTag ?? true;
+    }
 
   } catch (error) {
     console.error('加载设置失败:', error);
@@ -216,4 +245,11 @@ function showShortcutInstructions() {
       modal.remove();
     }
   });
-} 
+}
+
+// 修改统计按钮事件处理
+document.getElementById('viewStats').addEventListener('click', () => {
+  chrome.tabs.create({
+    url: chrome.runtime.getURL('statistics/statistics.html')
+  });
+}); 

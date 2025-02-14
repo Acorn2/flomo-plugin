@@ -38,12 +38,28 @@
     </div>
 
     <div class="section">
-      <h2>默认标签</h2>
+      <h2>标签设置</h2>
       <div class="setting-box">
         <div class="input-group">
           <label>默认标签:</label>
           <div class="input-wrapper">
             <input type="text" id="defaultTag" placeholder="#Chrome阅读笔记" value="#Chrome阅读笔记">
+          </div>
+        </div>
+        
+        <div class="input-group">
+          <div class="toggle-wrapper">
+            <label class="toggle-label">
+              <span>启用网站名称标签</span>
+              <div class="switch">
+                <input type="checkbox" id="enableSiteTag" checked>
+                <span class="slider"></span>
+              </div>
+            </label>
+          </div>
+          <div class="notice">
+            <span class="notice-icon">ℹ️</span>
+            <span class="notice-text">启用后将优先从页面标题解析网站名称(如：掘金、知乎)作为标签，若解析失败则使用默认标签</span>
           </div>
         </div>
       </div>
@@ -153,6 +169,45 @@
               </div>
               <span class="theme-name">蛇年主题</span>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <h2>统计分析</h2>
+      <div class="stats-info">
+        <p>📊 统计分析功能可帮您了解:</p>
+        <ul>
+          <li>每月保存的内容数量和趋势</li>
+          <li>不同来源网站的内容分布</li>
+          <li>最近保存的内容记录</li>
+        </ul>
+        <p class="stats-note">
+          ℹ️ 统计数据仅保存最近3个月,且只记录必要信息
+          <span class="info-icon" id="dataStorageInfo" title="点击查看数据存储说明">ⓘ</span>
+        </p>
+      </div>
+      <button id="viewStats" class="stats-btn">
+        <span class="stats-btn-icon">📈</span>
+        <span class="stats-btn-text">查看保存统计</span>
+      </button>
+
+      <!-- 弹出框 -->
+      <div id="storageInfoModal" class="modal">
+        <div class="modal-content">
+          <span class="close-btn">&times;</span>
+          <h3>数据存储说明</h3>
+          <div class="storage-info-content">
+            <section>
+              <h4>✓ 以下情况数据不会丢失：</h4>
+              <p>关闭浏览器、重启电脑、浏览器崩溃、正常更新扩展</p>
+            </section>
+            <section>
+              <h4>⚠️ 以下情况数据可能丢失：</h4>
+              <p>手动卸载扩展、清除浏览器数据、浏览器强制清除、重新安装扩展</p>
+            </section>
+            <div class="tip">💡 建议定期导出数据作为备份，以防数据丢失</div>
           </div>
         </div>
       </div>
